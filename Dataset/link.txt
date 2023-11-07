@@ -1,0 +1,2 @@
+dataset from github 
+    https://github.com/aldrin233/RiceDiseases-DataSet.git
