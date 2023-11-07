@@ -2,8 +2,17 @@ import streamlit as st
 from roboflow import Roboflow
 import time
 
+
+styleEdit = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            div.stButton > button { float: right; }
+            </style>
+            """
+
 # genText = False
-testText = """โรคไหม้ (Rice Blast Disease) สาเหตุ: เกิดจากเชื้อรา Pyricularia grisea Sacc \n
+Rice_Blast = """โรคไหม้ (Rice Blast Disease) สาเหตุ: เกิดจากเชื้อรา Pyricularia grisea Sacc \n
 ลักษณะอาการ: ระยะกล้า  ที่ใบมีแผลจุดสีน้ำตาล ลักษณะคล้ายรูปตา มีสีเทาอยู่ตรงกลางแผล มีขนาดแตกต่างกันตามสภาพแวดล้อมและพันธุ์ข้าว ความกว้างระหว่าง 2-5 มิลลิเมตร และความยาวประมาณ 15-20 มิลลิเมตร แผลนี้สามารถขยายลุกลามจนแผลรวมกันทั่วบริเวณใบ ในกรณีที่โรครุนแรง กล้าข้าวจะแห้ง และฟุบตาย อาการคล้ายถูกไฟไหม้ (blast)\n
 ในระยะคอรวง เมื่อข้าวถูกเชื้อรานี้เข้าทำลาย จะทำให้คอรวงเสียหายเมล็ดลีบหมด แต่ถ้าเชื้อราเข้าทำลายตอนรวงข้าวแก่ใกล้เก็บเกี่ยว คอรวงจะปรากฎรอยแผลช้ำสีน้ำตาล ทำให้เปราะหักพับง่าย รวงข้าวร่วงหล่นเสียหายมาก
 ในปัจจุบันในแหล่งที่มีการทำนามากกว่าปีละครั้งจะพบโรคนี้แพร่ระบาดเป็นประจำ โดยเฉพาะในแหลงที่ปลูกข้าวหนาแน่น อับลม ใส่ปุ๋ยอัตราสูง และมีสภาพร้อนในตอนกลางวัน อากาศชื้นในตอนกลางคืน\n
@@ -13,6 +22,24 @@ testText = """โรคไหม้ (Rice Blast Disease) สาเหตุ: เ
 3.การคลุกเมล็ดพันธุ์ด้วยสารป้องกันกำจัดเชื้อราก่อนนำไปเพาะปลูก เช่น คาซูกามัยซิน ไตรไซคลาโซล คาร์เบนดาซิม  โพรคลอราซ  ตามอัตราที่แนะนำ\n
 4.ถ้าเกษตรกรพบโรคไหม้ระบาด ให้ทำการฉีดพ่นสารกำจัดเชื้อรา เช่น คาซูกามัยซิน คาร์เบนดาซิม อีดิเฟนฟอส  ไตรไซคลาโซล  ไอโซโพรไทโอเลน ตามอัตราที่แนะนำ\n
 5.เกษตรกรควรปฏิบัติตามแนวทางในการป้องกันโรคข้างต้นนี้ให้ได้มากที่สุด เพื่อการควบคุมโรคให้มีประสิทธิภาพสูงสุด"""
+
+Bacterial_Blight = """โรคขอบใบแห้ง (Bacterial Leaf Blight Disease or Bacterial Blight Disease) สาเหตุ: เชื้อแบคทีเรีย Xanthomonas oryzae pv. oryzae (ex Ishiyama) Swings et al.\n
+ลักษณะอาการ  โรคนี้เป็นได้ตั้งแต่ระยะกล้า แตกกอ จนถึงฺ ออกรวง ต้นกล้าก่อนนำไปปักดำจะมีจุดเล็กๆ ลักษณะช้ำที่ขอบใบของใบล่าง ต่อมาประมาณ 7-10 วัน จุดช้ำนี้จะขยายกลายเป็นทางสีเหลืองยาวตามใบข้าว ใบที่เป็นโรคจะแห้งเร็ว และสีเขียวจะจางลงเป็นสีเทาๆ อาการในระยะปักดำจะแสดงหลังปักดำแล้วหนึ่งเดือนถึงเดือนครึ่ง ใบที่เป็นโรคขอบใบมีรอยขีดช้ำ ต่อมาจะเปลี่ยนเป็นสีเหลือง ที่แผลมีหยดน้ำสีครีมคล้ายยางสนกลมๆ ขนาดเล็กเท่าหัวเข็มหมุด ต่อมาจะกลายเป็นสีน้ำตาลและหลุดไปตามน้ำหรือฝน ซึ่งจะทำให้โรคสามารถระบาดต่อไปได้ แผลจะขยายไปตามความยาวของใบ บางครั้งขยายเข้าไปข้างในตามความกว้างของใบ ขอบแผลมีลักษณะเป็นขอบลายหยัก แผลนี้เมื่อนานไปจะเปลี่ยนเป็นสีเทา ใบที่เป็นโรคขอบใบจะแห้งและม้วนตามความยาว ในกรณีที่ต้นข้าวมีความอ่อนแอและเชื้อโรคมีปริมาณมาก จะทำให้ท่อน้ำท่ออาหารอุดตัน ต้นข้าวจะเหี่ยวเฉาและแห้งตายทั้งต้นโดยรวดเร็ว เรียกอาการนี้ว่า ครีเสก (kresek) การแพร่ระบาด  เชื้อสาเหตุโรคสามารถแพร่ไปกับน้ำ ในสภาพแวดล้อมที่มีความชื้นสูง และสภาพที่มีฝนตก ลมพัดแรง จะช่วยให้โรคแพร่ระบาดอย่างกว้างขวางรวดเร็ว\n\n
+การป้องกันกำจัด\n
+1.ไม่นำเมล็ดพันธุ์จากแปลงเป็นโรคมาใช้ปลูก\n
+2.ใช้พันธุ์ข้าวที่ต้านทาน เช่น พันธุ์สุพรรณบุรี 60 สุพรรณบุรี 90 สุพรรณบุรี 1 สุพรรณบุรี 2 กข 7 และ กข 23 ในสภาพดินที่อุดมสมบูรณ์สูง\n
+3.ไม่ควรใส่ปุ๋ยไนโตรเจนมาก\n
+4.ไม่ควรระบายน้ำจากแปลงที่เป็นโรคไปสู่แปลงอื่น\n
+5.ควรเฝ้าระวังการเกิดโรคถ้าปลูกข้าวพันธุ์ที่อ่อนแอต่อโรคนี้ เช่น พันธุ์ขาวดอกมะลิ 105 กข 6 เหนียวสันป่าตอง พิษณุโลก 2 ชัยนาท 1 เมื่อเริ่มพบอาการของโรคบนใบข้าว ให้ใช้สารป้องกันกำจัดโรคพืช เช่น ไอโซโพรไทโอเลน คอปเปอร์ไฮดรอกไซด์ เสตร็พโตมัยซินซัลเฟต+ออกซีเตทตราไซคลินไฮโดรคลอร์ไรด์ ไตรเบซิคคอปเปอร์ซัลเฟต"""
+
+Brown_Spot = """โรคใบจุดสีน้ำตาล (Brown Spot Disease) สาเหตุ: เชื้อรา Bipolaris oryzae (Helminthosporium oryzae Breda de Haan)\n
+ลักษณะอาการ: โรคใบจุดสีน้ำตาลพบมากในดินที่ขาดธาตุอาหาร ซิลิคอน โพแทสเซียม แมงกานีส แมกนีเซียม และในสภาพที่ข้าวเมาตอซัง เป็นอาการของข้าวที่ได้รับผลกระทบจากกระบวนการย่อยสลายของฟางหรือตอซังเก่าที่ยังไม่สมบูรณ์  จะเกิดก็าซไฮโดรเจนซัลไฟด์ขึ้นเป็นสาเหตุที่ทำให้ข้าวเกิดอาการรากเน่าดำ ไม่สามารถดูดน้ำและธาตุอาหารจากดินได้  ต้นข้าวจึงแสดงอาการขาดธาตุอาหาร ทำให้ข้าวอ่อนแอต่อโรคใบจุดสีน้ำตาล  เชื้อรานี้เข้าทำลายข้าวได้ดีที่อุณหภูมิ 25 – 30 องศาเซลเซียส  โดยเฉพาะเมื่อข้าวเกิดความเครียดจากการขาดน้ำ การพัฒนาของโรคสามารถเกิดขึ้นได้ดีเมื่อสภาพอากาศมีความชื้นสัมพัทธ์สูง มากกว่า 80 เปอร์เซ็นต์   เชื้อราสามารถอยู่อาศัยได้ในพืชอื่นๆนอกจากข้าว ได้แก่ ข้าวบาร์เลย์  ข้าวโอ๊ต ข้าวโพด หญ้าแพรก หญ้าตีนกา และหญ้าไซ เป็นต้น การแพร่ระบาด  เกิดจากสปอร์ของเชื้อราปลิวไปตามลม และติดไปกับเมล็ด\n\n
+การป้องกันกำจัด\n
+1.ปรับปรุงดินโดยการไถกลบฟาง หรือเพิ่มความอุดมสมบูรณ์ดินโดยการปลูกพืชปุ๋ยสด หรือปลูกพืชหมุนเวียนเพื่อช่วยลดความรุนแรงของโรค\n
+2.คลุกเมล็ดพันธุ์ก่อนปลูกด้วยสารป้องกันกำจัดเชื้อรา เช่น แมนโคเซบ หรือคาร์เบนดาซิม+แมนโคเซบ อัตรา 3 กรัม/เมล็ด 1 กิโลกรัม\n
+3.ใส่ปุ๋ยโปแตสเซียมคลอไรด์ (0-0-60) อัตรา 5-10 กิโลกรัม/ไร่ ช่วยลดความรุนแรงของโรค\n
+4.กำจัดวัชพืชในนา ดูแลแปลงให้สะอาด และใส่ปุ๋ยในอัตราที่เหมาะสม\n
+5.ถ้าพบอาการของโรคใบจุดสีน้ำตาลรุนแรงทั่วไป 10 เปอร์เซ็นต์ของพื้นที่ใบในระยะข้าวแตกกอ หรือในระยะที่ต้นข้าวตั้งท้องใกล้ออกรวง เมื่อพบอาการใบจุดสีน้ำตาลที่ใบธงในสภาพฝนตกต่อเนื่อง อาจทำให้เกิดโรคเมล็ดด่าง ควรพ่นด้วยสารป้องกันกำจัดเชื้อรา เช่น อีดิเฟนฟอส คาร์เบนดาซิม แมนโคเซบ หรือ คาร์เบนดาซิม+แมนโคเซบ ตามอัตราที่ระบุ"""
 
 text2 = """สาเหตุของอาการปวดหลัง\n
 อาการปวดหลังสามารถเกิดได้จากหลายปัจจัย เช่น การทำกิจกรรมในชีวิตประจำวัน การทำท่าทางที่ไม่ถูกต้องสะสมเป็นเวลานาน การเคล็ดขัดยอก การตึง การอักเสบของกล้ามเนื้อหรือเส้นเอ็นบริเวณหลัง ปัญหาของหมอนรองกระดูก ปัญหาของกระดูกสันหลังและเส้นประสาท ปัญหาจากโรค หรืออาจเกิดจากสาเหตุอื่น ๆ ซึ่งอาการปวดหลังจะส่งผลต่อการเคลื่อนไหวของร่างกายและการดำเนินชีวิตประจำวัน\n
@@ -34,6 +61,7 @@ def textGenerator(text):
     # global genText
     # global info_container
     displaytext = ""
+    st.markdown(styleEdit, unsafe_allow_html=True)
     for i in text:
         displaytext += i
         info_container.info(displaytext)
@@ -61,73 +89,36 @@ uploaded_file = st.file_uploader("Upload rice images here")
 
 colOriImage, colPreImage = st.columns(2)
 if uploaded_file is not None:
-    # text.text_area('', placeholder='กรุณากรอกปัญหาของคุณที่ช่องนี้', value='', key='2')
+    st.markdown(styleEdit, unsafe_allow_html=True)
+    text.text_area('', placeholder='กรุณากรอกปัญหาของคุณที่ช่องนี้', value='', key='2')
     colOriImage.image(uploaded_file, use_column_width=True, caption="Original")
     with open("uploaded_image.jpg", "wb") as f:
         f.write(uploaded_file.read())
         response = model.predict('./uploaded_image.jpg', confidence=50, overlap=30)
         response.save('predictions.jpg')
     colPreImage.image("./predictions.jpg", use_column_width=True, caption="Detected")
-    classOfRes = response.json()
-    print(classOfRes)
+    textResponse = response.json()
+    print(textResponse['predictions'][0]['class'])
     if response is not None:
         st.write("<script>document.querySelector('textarea').value ='';</script>",unsafe_allow_html=True)
-        textGenerator(testText)
-    textGenerator(testText)
-    # print(classOfRes)
-    # print()
-    # print(len(classOfRes['predictions']))
-    # print()
-    # print(classOfRes['predictions'][0]['class'])
+        # textGenerator(Rice_Blast)
+        if (textResponse['predictions'][0]['class'] == "Rice_Blast"):
+            textGenerator(Rice_Blast)
+        elif (textResponse['predictions'][0]['class'] == "Bacterial_Blight"):
+            textGenerator(Bacterial_Blight)
+        elif (textResponse['predictions'][0]['class'] == "Brown_Spot"):
+            textGenerator(Brown_Spot)
 
+st.markdown(styleEdit, unsafe_allow_html=True)
 
-
-
-styleEdit = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
+# styleEdit = """
+#             <style>
+#             #MainMenu {visibility: hidden;}
+#             footer {visibility: hidden;}
             
-            div.stButton > button {
-            float: right;
-            }
-            </style>
-            """
-st.markdown(styleEdit, unsafe_allow_html=True) 
-
-
-# st.markdown(
-#         """
-#         <style>
-#         div.stButton > button {
+#             div.stButton > button {
 #             float: right;
-#         }
-#         </style>
-#         """,
-#         unsafe_allow_html=True
-#     )
-# infer on a local image
-# Start = 0
-# i = 1
-# while True:
-#     print("START")
-#     print()
-#     Start = dt.datetime.now()
-#     try :
-#         x = model.predict(f"D:\\KKU_World\\1_1\\AiInspiration\\1\\FinalPrj\\Dataset\\RiceDiseases-DataSet-master\\Bacterial leaf blight\\orig\\blight_orig_00{i}.png", confidence=40, overlap=30).save()
-#     except:
-#         x = model.predict(f"D:\\KKU_World\\1_1\\AiInspiration\\1\\FinalPrj\\Dataset\\RiceDiseases-DataSet-master\\Bacterial leaf blight\\orig\\blight_orig_00{i}.jpg", confidence=40, overlap=30).save()
-#     print(x)
-#     print()
-    
-#     print(dt.datetime.now() - Start)
-#     i+=1
-#     if i >= 9:
-#         break
-#     time.sleep(2)
-
-# visualize your prediction
-# model.predict("your_image.jpg", confidence=40, overlap=30).save("prediction.jpg")
-
-# infer on an image hosted elsewhere
-# print(model.predict("URL_OF_YOUR_IMAGE", hosted=True, confidence=40, overlap=30).json())
+#             }
+#             </style>
+#             """
+# st.markdown(styleEdit, unsafe_allow_html=True) 
