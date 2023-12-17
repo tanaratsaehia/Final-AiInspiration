@@ -75,6 +75,7 @@ with st.form('input_text'):
     text.text_area('', placeholder='กรุณากรอกปัญหาของคุณที่ช่องนี้', value='', key='1')
     submitted = st.form_submit_button('Submit')
 
+loading = st.empty()
 info_container = st.empty() 
 if submitted:
     info_container = st.empty()
@@ -86,7 +87,6 @@ if submitted:
 #     textGenerator(testText)
 
 uploaded_file = st.file_uploader("Upload rice images here")
-
 colOriImage, colPreImage = st.columns(2)
 if uploaded_file is not None:
     st.markdown(styleEdit, unsafe_allow_html=True)
@@ -100,7 +100,6 @@ if uploaded_file is not None:
     textResponse = response.json()
     print(textResponse['predictions'][0]['class'])
     if response is not None:
-        st.write("<script>document.querySelector('textarea').value ='';</script>",unsafe_allow_html=True)
         # textGenerator(Rice_Blast)
         if (textResponse['predictions'][0]['class'] == "Rice_Blast"):
             textGenerator(Rice_Blast)
@@ -108,6 +107,8 @@ if uploaded_file is not None:
             textGenerator(Bacterial_Blight)
         elif (textResponse['predictions'][0]['class'] == "Brown_Spot"):
             textGenerator(Brown_Spot)
+# if uploaded_file is not None:
+    
 
 st.markdown(styleEdit, unsafe_allow_html=True)
 
